@@ -1,4 +1,5 @@
 # list
+from lesson_01.type_strigs import coordinates
 
 fruits = ["apple", "banana", "cherry"]
 numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
@@ -86,8 +87,60 @@ dict_any = {
     "two": 2,
     (0,1): "rtfyu"
 }
+
 dict_any[(True,False)] = True
 print(dict_any)
+dict_any[(False,True)] = "RETREWQ"
+print(dict_any)
+
+print((True,False) == (1,0))
+
+prices = {
+    "apple": 1,
+    "banana": 2,
+    "cherry": 3,
+}
+for product in prices:
+    print("Product: ", product)
+
+for product, price in prices.items():
+    print(f"Product: {product}, price: {price}$")
+
+print(list(prices.keys()))
+print(list(prices.values()))
+print(sum(prices.values()))
+
+# set
+colors = {"red", "green", "blue"}
+print(colors)
+colors.discard("red")
+print("green" in colors)
+numbers_set = {1, 2, 10, 4, 5, 6, 6, 8, 1, 10}
+print(numbers_set)
+
+empty_dict = {}
+print(type(empty_dict))
+empty_set = set()
+print(type(empty_set))
+
+colors.add("yellow")
+print(colors)
+
+names = ["Ivan", "Jose", "Jose", "Nina", "Ivan"]
+print(names)
+
+unique_names = set(names)
+print(unique_names)
+
+set1 = {1, 2, 3, 4}
+set2 = {3, 4, 5, 6}
+print(set1 | set2)
+print(set1 & set2)
+print(set1 - set2)
+print(set2 - set1)
+print(set1 ^ set2)
+
+
 
 
 
