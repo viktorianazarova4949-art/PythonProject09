@@ -131,7 +131,6 @@ print(names)
 
 unique_names = set(names)
 print(unique_names)
-
 set1 = {1, 2, 3, 4}
 set2 = {3, 4, 5, 6}
 print(set1 | set2)
