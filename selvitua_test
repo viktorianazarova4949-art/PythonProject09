@@ -1,0 +1,336 @@
+# Урок по Unit-тестированию: Разбор тестов для `Account` и `UserProfile`
+
+---
+
+## **Введение**
+
+Этот документ представляет собой разбор unit-тестов для функций работы с аккаунтами, профилями пользователей и валидацией email. Материал предназначен для изучения основ тестирования в Python с использованием фреймворка `unittest`.
+
+---
+
+## **1. Базовые концепции `unittest`**
+
+### **Что такое `unittest`?**
+
+`unittest` — это встроенный фреймворк для написания и выполнения тестов в Python. Он следует подходу **xUnit** (аналогично JUnit в Java).
+
+**Основные компоненты:**
+
+- **`TestCase`**: Базовый класс, от которого наследуются все тесты.
+- **Методы-тесты**: Методы, имена которых начинаются с `test_`. Они автоматически запускаются фреймворком.
+- **Assertions (проверки)**: Методы типа `assertEqual`, `assertTrue`, `assertIn` и др. для проверки условий.
+
+**Почему важно именовать тесты как `test_*`?**
+Фреймворк `unittest` автоматически находит и запускает все методы, имена которых начинаются с `test_`. Это позволяет:
+
+- Автоматически собирать тесты.
+- Запускать их пакетом (например, через `python -m unittest`).
+- Избегать ручного вызова каждого теста.
+
+---
+
+## **2. Разбор класса `TestAccount`**
+
+Этот класс тестирует функции для работы с именами, username и валидации email.
+
+### **2.1. Тестирование функции `clean_name`**
+
+```python
+class TestAccount(unittest.TestCase):
+    def test_strip_space(self):
+        self.assertEqual(clean_name(" sveta "), "Sveta")
+
+    def test_capitalize(self):
+        self.assertEqual(clean_name("sveta"), "Sveta")
+```
+
+**Что проверяется?**
+
+- `test_strip_space`: Функция `clean_name` должна удалять пробелы в начале и конце строки, а также приводить её к заглавной букве.
+- `test_capitalize`: Функция должна корректно приводить строку к заглавной букве, даже если пробелов нет.
+
+**Что не хватает?**
+
+- Тестов на пустую строку (`""`).
+- Тестов на строку с несколькими пробелами между словами.
+- Тестов на некорректные входные данные (например, `None` или числа).
+
+**Совет:**
+Добавьте тесты для крайних случаев (edge cases), чтобы убедиться, что функция работает стабильно.
+
+---
+
+### **2.2. Тестирование функции `make_username`**
+
+```python
+    def test_username_from_first_last(self):
+        self.assertEqual(make_username("Sveta", "Sveta"), "sveta_sveta")
+```
+
+**Что проверяется?**
+Функция `make_username` должна объединять имя и фамилию через подчёркивание и приводить к нижнему регистру.
+
+**Что не хватает?**
+
+- Тесты на пустые строки (`""`).
+- Тесты на очень длинные имена (если есть ограничения по длине).
+- Тесты на символы, которые не должны быть в username (например, пробелы или специальные символы).
+
+---
+
+### **2.3. Тестирование функции `is_valid_email`**
+
+```python
+    def test_valid_email(self):
+        self.assertTrue(is_valid_email("sveta123@gmail.com"))
+
+    def test_invalid_email(self):
+        self.assertFalse(is_valid_email("svate.cvft.rt"))
+        self.assertFalse(is_valid_email("sveta@vbgyt"))
+```
+
+**Что проверяется?**
+
+- `test_valid_email`: Корректный email должен возвращать `True`.
+- `test_invalid_email`: Некорректные email (без `@` или с неверным доменом) должны возвращать `False`.
+
+**Что не хватает?**
+
+- Тесты на email без точки в домене (например, `sveta@gmailcom`).
+- Тесты на email с несколькими `@` (например, `sveta@@gmail.com`).
+- Тесты на email с пробелами (`"sveta 123@gmail.com"`).
+
+**Совет:**
+Используйте регулярные выражения для валидации email, если это ещё не сделано.
+
+---
+
+### **2.4. Тестирование функции `is_valid_email_second`**
+
+```python
+    def test_valid_email_second(self):
+        self.assertTrue(is_valid_email_second("sveta123@gmail.com"))
+
+    def test_invalid_email_second(self):
+        self.assertFalse(is_valid_email_second("sveta123@wm.f"))
+
+    def test_invalid_email_without_at_second(self):
+        self.assertFalse(is_valid_email_second("sveta123.wm.frt"))
+
+    def test_invalid_email_without_domain_second(self):
+        self.assertFalse(is_valid_email_second("sveta123@"))
+
+    def test_invalid_email_without_username_second(self):
+        self.assertFalse(is_valid_email_second("@gmail.com"))
+
+    def test_invalid_email_without_dot_second(self):
+        self.assertFalse(is_valid_email_second("sveta123@gmailcom"))
+```
+
+**Что проверяется?**
+Здесь тестируются различные случаи некорректных email:
+
+- Отсутствие `@`.
+- Отсутствие домена после `@`.
+- Отсутствие имени пользователя перед `@`.
+- Отсутствие точки в домене.
+
+**Плюсы:**
+
+- Хорошее покрытие крайних случаев.
+- Ясные имена тестов, которые сразу понятно, что проверяют.
+
+**Совет:**
+Можно объединить некоторые тесты в параметризованные тесты (например, с использованием `subTest` или `pytest`), чтобы избежать дублирования кода.
+
+---
+
+## **3. Разбор класса `TestUserProfile`**
+
+Этот класс тестирует работу с профилем пользователя.
+
+### **3.1. Метод `setUp`**
+
+```python
+class TestUserProfile(unittest.TestCase):
+    def setUp(self):
+        self.user = {
+            "name": "Sveta",
+            "email": "sveta123@gmail.com",
+            "role": ["user"],
+        }
+```
+
+**Что делает?**
+Создаёт объект `self.user` перед каждым тестом. Это полезно, если тесты зависят от одного и того же начального состояния.
+
+**Почему это важно?**
+Изоляция тестов: каждый тест начинает с чистого состояния, что предотвращает влияние одного теста на другой.
+
+---
+
+### **3.2. Тестирование профиля пользователя**
+
+```python
+    def test_profile_has_name(self):
+        self.assertEqual(self.user["name"], "Sveta")
+
+    def test_valid_email(self):
+        self.assertTrue(is_valid_email_second(self.user["email"]))
+
+    def test_add_role(self):
+        self.user["role"].append("administrator")
+        self.assertIn("administrator", self.user["role"])
+        self.assertEqual(len(self.user["role"]), 2)
+
+    def test_check_length_role(self):
+        self.assertEqual(len(self.user["role"]), 1)
+```
+
+**Что проверяется?**
+
+- `test_profile_has_name`: Проверяет, что имя пользователя корректно.
+- `test_valid_email`: Проверяет, что email пользователя валиден.
+- `test_add_role`: Проверяет добавление новой роли и изменение длины списка ролей.
+- `test_check_length_role`: Проверяет начальную длину списка ролей.
+
+**Проблема:**
+Тесты `test_add_role` и `test_check_length_role` могут конфликтовать, если `setUp` не сбрасывает состояние между тестами.
+
+**Решение:**
+Убедитесь, что `setUp` действительно выполняется перед каждым тестом. В `unittest` это гарантируется.
+
+---
+
+## **4. Разбор класса `TestGetInitials`**
+
+Этот класс тестирует функцию для получения инициалов.
+
+### **4.1. Тестирование функции `get_initials`**
+
+```python
+class TestGetInitials(unittest.TestCase):
+    def test_get_normal_initials(self):
+        self.assertEqual(get_initials("Sveta Sveta"), "S.S.")
+
+    def test_str_empty_with_raise(self):
+        with self.assertRaises(ValueError):
+            get_initials("   ")
+```
+
+**Что проверяется?**
+
+- `test_get_normal_initials`: Функция должна возвращать инициалы в формате `"S.S."` для строки `"Sveta Sveta"`.
+- `test_str_empty_with_raise`: Функция должна выбрасывать исключение `ValueError` для пустой строки или строки с одними пробелами.
+
+**Плюсы:**
+
+- Хорошее покрытие как нормального случая, так и ошибки.
+- Использование `assertRaises` для проверки исключений.
+
+**Что не хватает?**
+
+- Тесты на строку с одним словом (например, `"Sveta"`).
+- Тесты на строку с несколькими пробелами между словами (например, `"Sveta  Sveta"`).
+- Тесты на строку с ведущими/заключительными пробелами (например, `" Sveta Sveta "`).
+
+---
+
+## **5. Общие рекомендации по улучшению**
+
+### **5.1. Покрытие крайних случаев (Edge Cases)**
+
+Добавьте тесты для пустых строк, `None`, очень длинных строк, строк с некорректными символами.
+
+**Пример для `clean_name`:**
+
+```python
+def test_clean_name_empty(self):
+    self.assertEqual(clean_name(""), "")
+
+def test_clean_name_none(self):
+    with self.assertRaises(TypeError):
+        clean_name(None)
+```
+
+---
+
+### **5.2. Параметризованные тесты**
+
+Используйте `subTest` или библиотеку `pytest` для уменьшения дублирования кода.
+
+**Пример с `subTest`:**
+
+```python
+def test_invalid_emails(self):
+    invalid_emails = [
+        "svate.cvft.rt",
+        "sveta@vbgyt",
+        "sveta123@wm.f",
+        "sveta123.wm.frt",
+        "sveta123@",
+        "@gmail.com",
+        "sveta123@gmailcom"
+    ]
+    for email in invalid_emails:
+        with self.subTest(email=email):
+            self.assertFalse(is_valid_email_second(email))
+```
+
+---
+
+### **5.3. Документация**
+
+Добавьте docstring для тестов, чтобы было понятно, что именно проверяется:
+
+```python
+def test_strip_space(self):
+    """Проверяет, что clean_name удаляет пробелы и приводит к заглавной букве."""
+    self.assertEqual(clean_name(" sveta "), "Sveta")
+```
+
+---
+
+### **5.4. Использование `pytest`**
+
+Если возможно, перейдите на `pytest` — он более гибкий и удобный для написания тестов.
+
+---
+
+## **6. Итоговые выводы**
+
+### **Плюсы вашего кода:**
+
+✅ Хорошая структура тестов.
+✅ Ясные имена методов.
+✅ Покрытие основных случаев.
+✅ Использование `setUp` для изоляции тестов.
+
+### **Что можно улучшить:**
+
+🔹 Добавьте тесты для крайних случаев.
+🔹 Используйте параметризованные тесты для уменьшения дублирования.
+🔹 Проверьте, что функции работают с некорректными входными данными (например, `None`).
+🔹 Убедитесь, что тесты не зависят друг от друга (используйте `setUp`).
+
+---
+
+## **7. Практическое задание для закрепления**
+
+Попробуйте:
+
+1. Дописать тесты для крайних случаев в `TestAccount`.
+2. Объединить тесты для `is_valid_email_second` в один параметризованный тест.
+3. Добавить docstring для всех тестов.
+
+---
+
+## **8. Полезные ресурсы**
+
+- [Документация `unittest`](https://docs.python.org/3/library/unittest.html)
+- [Руководство по `pytest`](https://docs.pytest.org/)
+- [Статья про тестирование в Python](https://realpython.com/python-testing/)
+
+---
+
+**Вопросы?** Если есть вопросы или хотите разобрать конкретный момент подробнее — спрашивайте! 😊
